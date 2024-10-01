@@ -10,7 +10,9 @@ SECRET_KEY = "django-insecure-bzd3gl@jt0cx(x!)mv4-_@s@@8ufj9^-b8@!+^*-u@sj2u@^#%
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['property-finance-manager.onrender.com']
+
+CSRF_TRUSTED_ORIGINS = ['https://property-finance-manager.onrender.com']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
