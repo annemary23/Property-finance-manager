@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Update Payment for {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Update Payment for {{ tenant.name }}</h2>
+
+    <!-- Grid layout for Property Details and Add Payment -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Property Details Card -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Property Details</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <p class="text-gray-700"><strong class="font-semibold">Property Name:</strong> {{ tenant.room.property.name }}</p>
+                    <p class="text-gray-700"><strong class="font-semibold">Room Number:</strong> {{ tenant.room.room_number }}</p>
+                    <p class="text-gray-700"><strong class="font-semibold">Contact:</strong> {{ tenant.contact_info }}</p>
+                    <p class="text-gray-700"><strong class="font-semibold">Rent Paid:</strong> {{ tenant.rent_paid|floatformat:0|intcomma }} {{ tenant.room.currency }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Payment Form Card -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Add Payment</h3>
+                <form method="post" action="{% url 'update_payment' tenant.id %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label for="amount_paid" class="block text-sm font-medium text-gray-700">Amount Paid</label>
+                        <input type="number" name="amount_paid" id="amount_paid" placeholder="Enter amount paid" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <div>
+                        <label for="date_paid" class="block text-sm font-medium text-gray-700">Date Paid</label>
+                        <input type="date" name="date_paid" id="date_paid" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+
+                    <!-- Centered Save Button -->
+                    <div class="text-center">
+                        <button type="submit" class="w-1/2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-150 ease-in-out">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment History Card (full-width below the other two cards) -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden mt-8">
+        <div class="p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Payment History</h3>
+            {% if payment_history %}
+                <ul class="divide-y divide-gray-200">
+                    {% for payment in payment_history %}
+                        <li class="py-3 flex justify-between items-center">
+                            <span class="text-gray-700">{{ payment.date_paid }}</span>
+                            <span class="font-semibold text-gray-900">{{ payment.amount_paid|floatformat:0|intcomma }} {{ tenant.room.currency }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-600">No payment history available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Back Button to Tenants List -->
+    <a href="{% url 'tenant_list' %}" class="inline-block bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out mt-6">
+        Back to Tenants
+    </a>
+</div>
+{% endblock %}

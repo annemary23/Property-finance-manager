@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Edit Tenant{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Edit Tenant</h2>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="p-6">
+            <form method="post" action="{% url 'edit_tenant' tenant.id %}" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Name -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Name:</label>
+                    <input type="text" id="name" name="name" value="{{ tenant.name }}" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <label for="contact_info" class="block text-sm font-medium text-gray-700">Contact Info:</label>
+                    <input type="text" id="contact_info" name="contact_info" value="{{ tenant.contact_info }}" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+
+                <!-- Property -->
+                <div>
+                    <label for="property" class="block text-sm font-medium text-gray-700">Property:</label>
+                    <select id="property" name="property" onchange="fetchAvailableRooms()"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                        <option value="">Select Property</option>
+                        {% for property in properties %}
+                        <option value="{{ property.id }}" {% if tenant.room and property.id == tenant.room.property.id %}selected{% endif %}>
+                            {{ property.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Room -->
+                <div>
+                    <label for="room" class="block text-sm font-medium text-gray-700">Room:</label>
+                    <select id="room" name="room"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                        <option value="">Select Room</option>
+                        {% for room in rooms %}
+                        <option value="{{ room.id }}" {% if tenant.room and room.id == tenant.room.id %}selected{% endif %}>
+                            {{ room.room_number }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Tenancy Start -->
+                <div>
+                    <label for="tenancy_start" class="block text-sm font-medium text-gray-700">Tenancy Start:</label>
+                    <input type="date" id="tenancy_start" name="tenancy_start" value="{{ tenant.tenancy_start }}"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+
+                <!-- Tenancy End -->
+                <div>
+                    <label for="tenancy_end" class="block text-sm font-medium text-gray-700">Tenancy End:</label>
+                    <input type="date" id="tenancy_end" name="tenancy_end" value="{{ tenant.tenancy_end }}"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+
+                <!-- Rent Paid -->
+<!--            <div>
+                    <label for="rent_paid" class="block text-sm font-medium text-gray-700">Rent Paid:</label>
+                    <input type="number" id="rent_paid" name="rent_paid" value="{{ tenant.rent_paid }}"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+-->
+                <!-- Update Button -->
+                <div class="text-center">
+                    <button type="submit"
+                        class="w-1/2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-150 ease-in-out">
+                        Update Tenant
+                    </button>
+                </div>
+            </form>
+
+            <!-- Back Button -->
+            <div class="mt-4 text-center">
+                <a href="{% url 'tenant_list' %}" class="inline-block bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out">
+                    Back to Tenants
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fetchAvailableRooms() {
+        const propertyId = document.getElementById('property').value;
+        const roomSelect = document.getElementById('room');
+
+        if (propertyId) {
+            fetch(`/api/available-rooms/${propertyId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Clear previous room options
+                    roomSelect.innerHTML = '<option value="">Select Room</option>';
+
+                    // Populate the available rooms
+                    data.forEach(room => {
+                        const option = document.createElement('option');
+                        option.value = room.id;
+                        option.text = room.room_number;
+                        roomSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching available rooms:', error);
+                });
+        } else {
+            // Reset the room select if no property is selected
+            roomSelect.innerHTML = '<option value="">Select Room</option>';
+        }
+    }
+</script>
+{% endblock %}

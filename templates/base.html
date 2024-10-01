@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PMFA{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        teal: {
+                            500: '#008080',
+                            600: '#006666',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 font-['Inter',sans-serif]">
+    <div class="flex min-h-screen">
+        <nav class="w-64 bg-teal-500 text-white">
+            <div class="p-6">
+                <h1 class="text-2xl font-semibold mb-6">Property Finance Manager</h1>
+                <ul class="space-y-2">
+                    <li><a href="{% url 'dashboard' %}"
+                            class="block py-2 px-4 hover:bg-teal-600 rounded transition duration-150 ease-in-out">Dashboard</a>
+                    </li>
+                    <li><a href="{% url 'property_list' %}"
+                            class="block py-2 px-4 hover:bg-teal-600 rounded transition duration-150 ease-in-out">Properties</a>
+                    </li>
+                    <li><a href="{% url 'tenant_list' %}"
+                            class="block py-2 px-4 hover:bg-teal-600 rounded transition duration-150 ease-in-out">Tenants</a>
+                    </li>
+                    <li><a href="{% url 'service_provider_list' %}"
+                            class="block py-2 px-4 hover:bg-teal-600 rounded transition duration-150 ease-in-out">Service
+                            Providers</a></li>
+                    <li><a href="{% url 'complaint_list' %}"
+                            class="block py-2 px-4 hover:bg-teal-600 rounded transition duration-150 ease-in-out">Complaints</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="p-6 border-t border-teal-400">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded transition duration-150 ease-in-out">Logout</button>
+                </form>
+            </div>
+        </nav>
+        <div class="flex-1" style="background-color: #f0f0f0;">
+            <main class="p-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>        
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Add Complaint{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800">Add New Complaint</h2>
+        </div>
+        <form method="post" class="p-6">
+            {% csrf_token %}
+            <div class="space-y-6">
+                {{ form.as_p }}
+            </div>
+            <div class="mt-6">
+                <button type="submit"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                    Save Complaint
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Custom styles for form inputs */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="url"],
+    textarea,
+    select {
+        margin-top: 0.25rem;
+        display: block;
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 2px solid rgb(24, 23, 23);
+        /* Dark RGB border */
+        background-color: #F9FAFB;
+        padding: 0.5rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Highlighted border on focus */
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+        border-color: rgb(24, 23, 23);
+        /* Same dark border on focus */
+        box-shadow: 0 0 0 3px rgba(24, 23, 23, 0.25);
+        /* Subtle focus ring */
+    }
+
+    /* Custom styles for checkboxes */
+    input[type="checkbox"] {
+        height: 1rem;
+        width: 1rem;
+        color: #3B82F6;
+        border-color: #D1D5DB;
+        border-radius: 0.25rem;
+
+        focus: {
+            ring-color: #3B82F6;
+        }
+    }
+</style>
+{% endblock %}

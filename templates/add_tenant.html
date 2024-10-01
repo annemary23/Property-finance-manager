@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Tenant{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800">Add New Tenant</h2>
+        </div>
+        <form method="POST" class="p-6">
+            {% csrf_token %}
+
+            <!-- Name (required) -->
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700">Name:</label>
+                <input type="text" id="name" name="name" required
+                    class="w-full mt-1 rounded-md border-2 border-gray-300 p-2 focus:ring focus:border-gray-500">
+            </div>
+
+            <!-- Contact Info (required) -->
+            <div class="mb-4">
+                <label for="contact_info" class="block text-sm font-medium text-gray-700">Contact Info:</label>
+                <input type="text" id="contact_info" name="contact_info" required
+                    class="w-full mt-1 rounded-md border-2 border-gray-300 p-2 focus:ring focus:border-gray-500">
+            </div>
+
+            <!-- Property (optional) -->
+            <div class="mb-4">
+                <label for="property" class="block text-sm font-medium text-gray-700">Property:</label>
+                <select id="property" name="property"
+                    class="w-full mt-1 rounded-md border-2 border-gray-300 p-2 focus:ring focus:border-gray-500">
+                    <option value="">Select a Property (Optional)</option>
+                    {% for property in properties %}
+                    <option value="{{ property.id }}">{{ property.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Room (optional) -->
+            <div class="mb-4">
+                <label for="room" class="block text-sm font-medium text-gray-700">Room:</label>
+                <select id="room" name="room" disabled
+                    class="w-full mt-1 rounded-md border-2 border-gray-300 p-2 focus:ring focus:border-gray-500">
+                    <option value="">Select a Room (Optional)</option>
+                </select>
+            </div>
+
+            <!-- Tenancy Start (optional) -->
+            <div class="mb-4">
+                <label for="tenancy_start" class="block text-sm font-medium text-gray-700">Tenancy Start:</label>
+                <input type="date" id="tenancy_start" name="tenancy_start"
+                    class="w-full mt-1 rounded-md border-2 border-gray-300 p-2 focus:ring focus:border-gray-500">
+            </div>
+
+            <!-- Tenancy End (optional) -->
+            <div class="mb-4">
+                <label for="tenancy_end" class="block text-sm font-medium text-gray-700">Tenancy End:</label>
+                <input type="date" id="tenancy_end" name="tenancy_end"
+                    class="w-full mt-1 rounded-md border-2 border-gray-300 p-2 focus:ring focus:border-gray-500">
+            </div>
+
+            <!-- Rent Paid (optional) -->
+            <div class="mb-4">
+                <label for="rent_paid" class="block text-sm font-medium text-gray-700">Rent Paid:</label>
+                <input type="number" id="rent_paid" name="rent_paid" value="0"
+                    class="w-full mt-1 rounded-md border-2 border-gray-300 p-2 focus:ring focus:border-gray-500">
+            </div>
+
+            <!-- Date Paid (optional) -->
+            <div class="mb-4">
+                <label for="date_paid" class="block text-sm font-medium text-gray-700">Date Paid:</label>
+                <input type="date" id="date_paid" name="date_paid"
+                    class="w-full mt-1 rounded-md border-2 border-gray-300 p-2 focus:ring focus:border-gray-500">
+            </div>
+
+            <!-- Submit -->
+            <div class="mt-6">
+                <button type="submit"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                    Add Tenant
+                </button>
+            </div>
+        </form>
+
+        <!-- Back button -->
+        <a href="{% url 'tenant_list' %}">
+            <button
+                class="w-full mt-4 bg-gray-500 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                Back to Tenants
+            </button>
+        </a>
+    </div>
+</div>
+
+<!-- Script to load rooms dynamically based on selected property -->
+<script>
+    document.getElementById('property').addEventListener('change', function () {
+        var propertyId = this.value;
+        var roomDropdown = document.getElementById('room');
+
+        // Clear existing rooms
+        roomDropdown.innerHTML = '<option value="">Select a Room (Optional)</option>';
+        roomDropdown.disabled = true;
+
+        if (propertyId) {
+            // Make an AJAX call to fetch the rooms based on the selected property
+            fetch(`/api/available-rooms/${propertyId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        roomDropdown.disabled = false;
+                        data.forEach(function (room) {
+                            var option = document.createElement('option');
+                            option.value = room.id;
+                            option.text = room.room_number;
+                            roomDropdown.add(option);
+                        });
+                    }
+                });
+        }
+    });
+</script>
+
+<style>
+    /* Custom styles for form inputs */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="url"],
+    input[type="date"],
+    textarea,
+    select {
+        margin-top: 0.25rem;
+        display: block;
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 2px solid rgb(24, 23, 23);
+        /* Dark RGB border */
+        background-color: #F9FAFB;
+        padding: 0.5rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Highlighted border on focus */
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+        border-color: rgb(24, 23, 23);
+        /* Same dark border on focus */
+        box-shadow: 0 0 0 3px rgba(24, 23, 23, 0.25);
+        /* Subtle focus ring */
+    }
+
+    /* Custom styles for checkboxes */
+    input[type="checkbox"] {
+        height: 1rem;
+        width: 1rem;
+        color: #3B82F6;
+        border-color: #D1D5DB;
+        border-radius: 0.25rem;
+
+        focus: {
+            ring-color: #3B82F6;
+        }
+    }
+</style>
+{% endblock %}

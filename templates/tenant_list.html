@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Tenants{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Tenants</h2>
+
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-center">
+        <!-- Search Form -->
+        <form method="get" action="{% url 'tenant_list' %}" class="w-full sm:w-auto mb-4 sm:mb-0">
+            <div class="flex bg-gray-100 rounded-lg shadow-md">
+                <input type="text" name="q" placeholder="Search by tenant name, property, or room number"
+                    value="{{ request.GET.q }}"
+                    class="flex-grow px-4 py-2 rounded-l-md border-0 bg-transparent focus:ring-blue-500 focus:border-blue-500">
+                <button type="submit"
+                    class="ml-2 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-150 ease-in-out">
+                    Search
+                </button>
+            </div>
+        </form>
+
+        <!-- Add New Tenant Button -->
+        <a href="{% url 'add_tenant' %}"
+            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-150 ease-in-out">
+            Add New Tenant
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for tenant in tenants %}
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="p-6">
+                <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ tenant.name }}</h4>
+                <p class="text-gray-600 mb-2"><strong>Contact:</strong> {{ tenant.contact_info }}</p>
+
+                {% if tenant.room_number == 'No Room Assigned' %}
+                <p class="text-yellow-600 font-semibold mb-2"><strong>Room Status:</strong> No Room Assigned</p>
+                {% else %}
+                <p class="text-gray-600 mb-1"><strong>Property Name:</strong> {{ tenant.property_name }}</p>
+                <p class="text-gray-600 mb-1"><strong>Room Number:</strong> {{ tenant.room_number }}</p>
+                <p class="text-gray-600 mb-1"><strong>Rent Paid:</strong> {{ tenant.rent_paid|floatformat:0|intcomma }}
+                    {{ tenant.currency }}</p>
+                <p class="text-gray-600 mb-2"><strong>Amount Due:</strong> {{ tenant.rent_due|floatformat:0|intcomma }}
+                    {{ tenant.currency }}</p>
+                {% endif %}
+
+                {% if tenant.overdue %}
+                <p class="text-red-600 font-semibold mb-2"><strong>{{ tenant.overdue_amount|floatformat:0|intcomma }} {{
+                        tenant.currency }} Overdue!</strong></p>
+                {% else %}
+                <p class="text-green-600 font-semibold mb-2"><strong>No Overdue Rent</strong></p>
+                {% endif %}
+
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <!-- Update Payment Button -->
+                    <a href="{% url 'update_payment' tenant.id %}"
+                        class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-150 ease-in-out">
+                        Update Payment
+                    </a>
+
+                    <!-- Delete Tenant Button with SweetAlert -->
+                    <button data-tenant-id="{{ tenant.id }}"
+                        class="delete-tenant bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-150 ease-in-out">
+                        Delete Tenant
+                    </button>
+
+                    <!-- Edit Tenant Button -->
+                    <a href="{% url 'edit_tenant' tenant.id %}"
+                        class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition duration-150 ease-in-out">
+                        Edit Tenant
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="col-span-full text-center text-gray-600">No tenants found. Add tenants using the green button above.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Include SweetAlert2 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Handle delete button click with SweetAlert
+        document.querySelectorAll('.delete-tenant').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const tenantId = this.getAttribute('data-tenant-id');
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Perform delete using POST request with CSRF token
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                        fetch(`/tenant/delete/${tenantId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                        }).then(response => {
+                            if (response.ok) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Tenant has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    // Reload the page after deletion
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire('Error', 'Failed to delete the tenant.', 'error');
+                            }
+                        }).catch(() => {
+                            Swal.fire('Error', 'Failed to delete the tenant.', 'error');
+                        });
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

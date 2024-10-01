@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Service Providers{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <h2 class="text-3xl font-bold mb-6 text-gray-800">Service Providers</h2>
+
+  <!-- Add New Service Provider Button -->
+  <a href="{% url 'add_service_provider' %}" class="inline-block">
+    <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105">
+      Add New Service Provider
+    </button>
+  </a>
+
+  <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for provider in service_providers %}
+    <div class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition duration-300 ease-in-out">
+      <div class="p-6">
+        <h3 class="text-xl font-semibold mb-2 text-gray-800">{{ provider.service_type }}</h3>
+        <p class="text-gray-600 mb-1"><strong class="text-gray-700">Name:</strong> {{ provider.name }}</p>
+        <p class="text-gray-600 mb-4"><strong class="text-gray-700">Contact:</strong> {{ provider.contact_info }}</p>
+
+        <!-- Delete Service Provider Button with SweetAlert -->
+        <button data-provider-id="{{ provider.id }}" class="delete-provider bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 w-full">
+          Delete Service Provider
+        </button>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-gray-600 col-span-full text-center py-8">No service providers found. Add a new service provider using the button above.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Include SweetAlert2 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Handle delete button click with SweetAlert
+        document.querySelectorAll('.delete-provider').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const providerId = this.getAttribute('data-provider-id');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Perform delete using POST request with CSRF token
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                        fetch(`/service_provider/delete/${providerId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                        }).then(response => {
+                            if (response.ok) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Service Provider has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    // Reload the page after deletion
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire('Error', 'Failed to delete the service provider.', 'error');
+                            }
+                        }).catch(() => {
+                            Swal.fire('Error', 'Failed to delete the service provider.', 'error');
+                        });
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
